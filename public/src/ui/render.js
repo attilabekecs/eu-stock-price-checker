@@ -79,6 +79,12 @@ export function populateCategories(rows) {
   select.replaceChildren(new Option("Összes", "all"), ...categories.map((category) => new Option(category, category)));
 }
 
+export function populateConditions(rows) {
+  const select = document.querySelector("#conditionFilter");
+  const conditions = [...new Set(rows.map((row) => row.condition))].sort((a, b) => a.localeCompare(b, "hu", { numeric: true }));
+  select.replaceChildren(new Option("Összes", "all"), ...conditions.map((condition) => new Option(condition, condition)));
+}
+
 export function renderTable(rows, onPurchasePriceChange) {
   const body = document.querySelector("#resultsBody");
   const fragment = document.createDocumentFragment();
