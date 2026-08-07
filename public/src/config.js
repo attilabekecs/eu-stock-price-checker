@@ -1,6 +1,5 @@
 export const PRICE_CURRENCY = "EUR";
-export const FAVORABLE_RATIO = 0.95;
-export const HIGH_RATIO = 1.05;
+export const STANDARD_VAT_MULTIPLIER = 1.27;
 export const FALLBACK_RATE = Object.freeze({
   base: "EUR",
   quote: "HUF",
@@ -11,4 +10,3 @@ export const FALLBACK_RATE = Object.freeze({
 });
 
 export const REQUIRED_COLUMNS = Object.freeze(["Model", "UnitPrice"]);
-

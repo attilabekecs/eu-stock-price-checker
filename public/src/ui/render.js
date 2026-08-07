@@ -1,8 +1,7 @@
 const STATUS_LABELS = Object.freeze({
-  favorable: "Kedvező",
-  typical: "Átlagos",
-  high: "Magas",
-  "no-reference": "Nincs összehasonlítás",
+  fits: "Keret alatt",
+  over: "Keret felett",
+  "no-target": "Nincs vételi ár",
 });
 
 const numberFormatter = new Intl.NumberFormat("hu-HU", { maximumFractionDigits: 2 });
@@ -38,6 +37,26 @@ function statusBadge(status) {
   return badge;
 }
 
+function purchasePriceInput(item, onPurchasePriceChange) {
+  const input = document.createElement("input");
+  input.className = "purchase-input";
+  input.type = "text";
+  input.inputMode = "numeric";
+  input.autocomplete = "off";
+  input.placeholder = "pl. 120 000";
+  input.setAttribute("aria-label", `${item.displayModel} saját vételi ára HUF-ban`);
+  input.value = Number.isFinite(item.purchasePriceHuf) ? integerFormatter.format(item.purchasePriceHuf) : "";
+  input.addEventListener("blur", () => onPurchasePriceChange(item.id, input.value));
+  input.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") input.blur();
+  });
+  return input;
+}
+
+function vatLabel(item) {
+  return item.vatType === "Standard VAT" ? "Standard ×1,27" : "Marginal ×1";
+}
+
 export function renderRate(rate) {
   document.querySelector("#rateValue").textContent = `1 EUR = ${numberFormatter.format(rate.rate)} HUF`;
   const formattedDate = dateFormatter.format(new Date(`${rate.date}T12:00:00`));
@@ -60,14 +79,14 @@ export function populateCategories(rows) {
   select.replaceChildren(new Option("Összes", "all"), ...categories.map((category) => new Option(category, category)));
 }
 
-export function renderTable(rows) {
+export function renderTable(rows, onPurchasePriceChange) {
   const body = document.querySelector("#resultsBody");
   const fragment = document.createDocumentFragment();
 
   if (rows.length === 0) {
     const row = document.createElement("tr");
     const cell = document.createElement("td");
-    cell.colSpan = 9;
+    cell.colSpan = 11;
     cell.className = "empty-row";
     cell.textContent = "A szűrésnek nincs megfelelő találata.";
     row.append(cell);
@@ -79,11 +98,13 @@ export function renderTable(rows) {
       appendCell(row, deviceCell(item));
       appendCell(row, item.storage);
       appendCell(row, item.condition);
+      appendCell(row, vatLabel(item));
       appendCell(row, integerFormatter.format(item.available), "numeric");
       appendCell(row, Number.isFinite(item.unitPriceEur) ? eurFormatter.format(item.unitPriceEur) : "—", "numeric");
       appendCell(row, Number.isFinite(item.unitPriceHuf) ? hufFormatter.format(item.unitPriceHuf) : "—", "numeric");
-      appendCell(row, item.comparableCount >= 2 && Number.isFinite(item.referenceHuf) ? hufFormatter.format(item.referenceHuf) : "—", "numeric");
-      appendCell(row, statusBadge(item.priceStatus));
+      appendCell(row, purchasePriceInput(item, onPurchasePriceChange), "purchase-cell");
+      appendCell(row, Number.isFinite(item.differenceHuf) ? hufFormatter.format(item.differenceHuf) : "—", `numeric difference-${item.purchaseStatus}`);
+      appendCell(row, statusBadge(item.purchaseStatus));
       fragment.append(row);
     }
   }

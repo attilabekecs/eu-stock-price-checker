@@ -1,9 +1,7 @@
 const STATUS_LABELS = Object.freeze({
-  favorable: "Kedvező",
-  typical: "Átlagos",
-  high: "Magas",
-  "no-reference": "Nincs összehasonlítás",
-  invalid: "Ellenőrzendő",
+  fits: "Keret alatt",
+  over: "Keret felett",
+  "no-target": "Nincs vételi ár",
 });
 
 function exportRows(rows, rate) {
@@ -23,10 +21,12 @@ function exportRows(rows, rate) {
     "ÁFA-típus": row.vatType,
     "MNB EUR/HUF": rate.rate,
     "Árfolyam dátuma": rate.date,
-    "Ár HUF-ban": row.unitPriceHuf,
-    "Referencia HUF": row.comparableCount >= 2 ? row.referenceHuf : null,
-    "Összehasonlítható sorok": row.comparableCount,
-    Árpozíció: STATUS_LABELS[row.priceStatus],
+    "ÁFA-szorzó": row.vatMultiplier,
+    "Nettó listaár HUF": row.netPriceHuf,
+    "Korrigált listaár HUF": row.unitPriceHuf,
+    "Saját vételi ár HUF": row.purchasePriceHuf,
+    "Eltérés HUF": row.differenceHuf,
+    Értékelés: STATUS_LABELS[row.purchaseStatus],
   }));
 }
 
@@ -40,7 +40,8 @@ export function downloadXlsx(rows, rate, sourceFileName, xlsx = globalThis.XLSX)
   sheet["!cols"] = [
     { wch: 12 }, { wch: 14 }, { wch: 34 }, { wch: 10 }, { wch: 16 }, { wch: 18 },
     { wch: 24 }, { wch: 28 }, { wch: 12 }, { wch: 32 }, { wch: 13 }, { wch: 12 },
-    { wch: 16 }, { wch: 14 }, { wch: 16 }, { wch: 16 }, { wch: 18 }, { wch: 20 }, { wch: 22 },
+    { wch: 16 }, { wch: 14 }, { wch: 14 }, { wch: 18 }, { wch: 22 }, { wch: 20 },
+    { wch: 18 }, { wch: 18 }, { wch: 18 },
   ];
   const workbook = xlsx.utils.book_new();
   xlsx.utils.book_append_sheet(workbook, sheet, "Ár-ellenőrzés");
@@ -59,4 +60,3 @@ export function downloadCsv(rows, rate, sourceFileName, xlsx = globalThis.XLSX) 
   link.click();
   URL.revokeObjectURL(url);
 }
-

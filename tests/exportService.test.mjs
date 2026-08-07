@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { downloadXlsx } from "../public/src/services/exportService.js";
 
-test("az Excel-export hozzáadja a HUF- és referenciaoszlopokat", () => {
+test("az Excel-export hozzáadja az ÁFA-, vételiár- és eltérésoszlopokat", () => {
   let exportedRows;
   let writtenFile;
   const sheet = {};
@@ -42,14 +42,18 @@ test("az Excel-export hozzáadja a HUF- és referenciaoszlopokat", () => {
     brand: "Apple",
     condition: "C",
     vatType: "Standard VAT",
-    unitPriceHuf: 35214,
-    referenceHuf: null,
-    comparableCount: 1,
-    priceStatus: "no-reference",
+    vatMultiplier: 1.27,
+    netPriceHuf: 35214,
+    unitPriceHuf: 44722,
+    purchasePriceHuf: 50000,
+    differenceHuf: 5278,
+    purchaseStatus: "fits",
   }], { rate: 363.03, date: "2026-08-06" }, "EU Stock list.xlsx", xlsx);
 
-  assert.equal(exportedRows[0]["Ár HUF-ban"], 35214);
-  assert.equal(exportedRows[0]["Referencia HUF"], null);
-  assert.equal(exportedRows[0].Árpozíció, "Nincs összehasonlítás");
+  assert.equal(exportedRows[0]["ÁFA-szorzó"], 1.27);
+  assert.equal(exportedRows[0]["Korrigált listaár HUF"], 44722);
+  assert.equal(exportedRows[0]["Saját vételi ár HUF"], 50000);
+  assert.equal(exportedRows[0]["Eltérés HUF"], 5278);
+  assert.equal(exportedRows[0].Értékelés, "Keret alatt");
   assert.equal(writtenFile, "EU-Stock-list-HUF.xlsx");
 });

@@ -200,7 +200,7 @@ p { margin-top: 0; }
 
 table {
   width: 100%;
-  min-width: 1100px;
+  min-width: 1460px;
   border-collapse: collapse;
   background: white;
   font-size: clamp(0.78rem, 0.72vw, 0.9rem);
@@ -225,7 +225,7 @@ th {
   white-space: nowrap;
 }
 
-th:nth-child(2) { width: 28%; }
+th:nth-child(2) { width: 24%; }
 td.numeric, th.numeric { text-align: right; font-variant-numeric: tabular-nums; }
 tbody tr:hover { background: #f5faf9; }
 tbody tr:last-child td { border-bottom: 0; }
@@ -243,10 +243,30 @@ tbody tr:last-child td { border-bottom: 0; }
   white-space: nowrap;
 }
 
-.badge-favorable { background: var(--good-bg); color: var(--good); }
-.badge-typical { background: var(--primary-pale); color: var(--primary-dark); }
-.badge-high { background: var(--warn-bg); color: var(--warn); }
-.badge-no-reference { background: var(--neutral-bg); color: var(--neutral); }
+.badge-fits { background: var(--good-bg); color: var(--good); }
+.badge-over { background: var(--warn-bg); color: var(--warn); }
+.badge-no-target { background: var(--neutral-bg); color: var(--neutral); }
+.purchase-cell { min-width: 150px; }
+.purchase-input {
+  width: 100%;
+  min-width: 130px;
+  height: 34px;
+  padding: 0 9px;
+  border: 1px solid #b8c7d3;
+  border-radius: 8px;
+  background: #fbfdff;
+  color: var(--ink);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.purchase-input:focus {
+  outline: 3px solid rgba(17, 100, 102, 0.14);
+  border-color: var(--primary);
+  background: white;
+}
+.difference-fits { color: var(--good); font-weight: 800; }
+.difference-over { color: var(--warn); font-weight: 800; }
+.difference-no-target { color: var(--neutral); }
 .empty-row { height: 160px; text-align: center; color: var(--ink-soft); }
 
 @media (min-width: 1700px) {

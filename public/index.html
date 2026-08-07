@@ -31,7 +31,7 @@
         <div class="section-heading">
           <div>
             <h1 id="results-title">Készülékárak</h1>
-            <p id="fileMeta" class="section-description">Tölts fel egy Excel-listát a táblázat megjelenítéséhez.</p>
+            <p id="fileMeta" class="section-description">Tölts fel egy Excel-listát, majd add meg a saját vételi áraidat HUF-ban.</p>
           </div>
           <div class="export-actions">
             <button id="exportXlsx" class="button button-primary" type="button" disabled>Excel letöltése</button>
@@ -45,13 +45,12 @@
             <input id="searchInput" type="search" placeholder="Modell, termékkód vagy leírás">
           </label>
           <label>
-            <span>Árpozíció</span>
+            <span>Értékelés</span>
             <select id="statusFilter">
               <option value="all">Összes</option>
-              <option value="favorable">Kedvező</option>
-              <option value="typical">Átlagos</option>
-              <option value="high">Magas</option>
-              <option value="no-reference">Nincs összehasonlítás</option>
+              <option value="fits">Keret alatt</option>
+              <option value="over">Keret felett</option>
+              <option value="no-target">Nincs vételi ár</option>
             </select>
           </label>
           <label>
@@ -66,7 +65,7 @@
           </div>
         </div>
 
-        <p class="comparison-note">Az árpozíció az azonos modell, tárhely, állapot és ÁFA-típus listán belüli mediánjához viszonyít.</p>
+        <p class="comparison-note">Standard VAT: listaár × MNB árfolyam × 1,27. Marginal VAT: listaár × MNB árfolyam. Az eltérés: saját vételi ár − korrigált listaár.</p>
 
         <div class="table-shell">
           <table>
@@ -76,16 +75,18 @@
                 <th>Felismerve</th>
                 <th>Tárhely</th>
                 <th>Állapot</th>
+                <th>ÁFA</th>
                 <th>Készlet</th>
-                <th>EUR-ár</th>
-                <th>Ár HUF-ban</th>
-                <th>Referencia HUF</th>
-                <th>Árpozíció</th>
+                <th>Listaár EUR</th>
+                <th>Listaár HUF</th>
+                <th>Saját vételi ár HUF</th>
+                <th>Eltérés HUF</th>
+                <th>Értékelés</th>
               </tr>
             </thead>
             <tbody id="resultsBody">
               <tr>
-                <td colspan="9" class="empty-row">Tölts fel egy Excel-listát.</td>
+                <td colspan="11" class="empty-row">Tölts fel egy Excel-listát.</td>
               </tr>
             </tbody>
           </table>

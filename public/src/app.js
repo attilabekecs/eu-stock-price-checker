@@ -1,6 +1,6 @@
 import { readStockWorkbook } from "./services/excelReader.js";
 import { loadExchangeRate } from "./services/exchangeRateService.js";
-import { evaluatePrices, hasUsablePrice } from "./services/priceEvaluator.js";
+import { applyPurchasePrice, evaluatePrices, hasUsablePrice } from "./services/priceEvaluator.js";
 import { downloadCsv, downloadXlsx } from "./services/exportService.js";
 import { populateCategories, renderRate, renderTable, setProcessStatus, showResults } from "./ui/render.js";
 
@@ -27,13 +27,26 @@ function currentFilteredRows() {
   return state.rows.filter((row) => {
     const searchable = `${row.productCode} ${row.description} ${row.displayModel} ${row.sourceModel}`.toLocaleLowerCase("hu-HU");
     return (!query || searchable.includes(query))
-      && (status === "all" || row.priceStatus === status)
+      && (status === "all" || row.purchaseStatus === status)
       && (category === "all" || row.category === category);
   });
 }
 
 function applyFilters() {
-  renderTable(currentFilteredRows());
+  renderTable(currentFilteredRows(), updatePurchasePrice);
+}
+
+function parsePurchasePrice(value) {
+  const digits = String(value ?? "").replace(/[^0-9]/g, "");
+  if (!digits) return null;
+  const parsed = Number(digits);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+
+function updatePurchasePrice(rowId, rawValue) {
+  const purchasePriceHuf = parsePurchasePrice(rawValue);
+  state.rows = state.rows.map((row) => row.id === rowId ? applyPurchasePrice(row, purchasePriceHuf) : row);
+  applyFilters();
 }
 
 async function processFile(file) {
@@ -46,7 +59,7 @@ async function processFile(file) {
     state.rows = evaluatePrices(pricedRows, state.rate.rate);
     state.fileName = file.name;
     populateCategories(state.rows);
-    renderTable(state.rows);
+    renderTable(state.rows, updatePurchasePrice);
     showResults(file.name, state.rows.length, parsed.sheetName, hiddenRowCount);
     elements.exportXlsx.disabled = false;
     elements.exportCsv.disabled = false;

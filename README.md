@@ -7,8 +7,9 @@ Nyilvános, statikus GitHub Pages alkalmazás az EU Stock listával azonos szerk
 - Beolvassa az első munkalap `Model` és `UnitPrice` oszlopát.
 - Felismeri az Apple és Samsung készülékeket, valamint a tárhelyet, állapotot és ÁFA-típust.
 - Az EUR-árat a Magyar Nemzeti Bank napi középárfolyamával HUF-ra váltja.
-- Külön `Ár HUF-ban` és `Referencia HUF` oszlopot jelenít meg.
-- Az azonos modell + tárhely + állapot + ÁFA-típus csoport mediánjához képest kedvező, átlagos vagy magas listán belüli árat jelez.
+- Standard VAT esetén az EUR-listaárat az MNB árfolyama mellett 1,27-es ÁFA-szorzóval, Marginal VAT esetén további szorzó nélkül váltja HUF-ra.
+- Soronként megadható a saját vételi ár HUF-ban.
+- Megjeleníti a saját vételi ár és a korrigált listaár különbségét, majd `Keret alatt` vagy `Keret felett` értékelést ad.
 - Csak a pozitív, számszerű árral rendelkező tételeket jeleníti meg és exportálja; a hibás, nulla vagy hiányzó árú sorokat elrejti.
 - Teljes képernyős, a monitor szélességéhez igazodó táblázatos munkaterületet biztosít.
 - Az eredményt XLSX- vagy CSV-fájlként exportálja.
@@ -37,9 +38,9 @@ A `.github/workflows/update-rate.yml` munkanapokon lekéri az MNB aktuális EUR/
 npm run update-rate
 ```
 
-## Árpozíció értelmezése
+## Ár-összehasonlítás
 
-Az árpozíció kizárólag a feltöltött listán belüli összehasonlítás. Nem minősül magyar piaci értékbecslésnek. Külső piaci referencia nélkül az egyetlen összehasonlítható sort tartalmazó csoportok `Nincs összehasonlítás` állapotot kapnak.
+A különbség képlete: `saját vételi ár HUF − korrigált listaár HUF`. A nulla vagy pozitív eltérés `Keret alatt`, a negatív eltérés `Keret felett` értékelést jelent. A manuálisan megadott vételi árak az exportált XLSX- és CSV-fájlba is bekerülnek.
 
 ## Licenc
 
