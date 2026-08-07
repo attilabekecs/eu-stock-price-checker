@@ -3,7 +3,11 @@ const YAHOO_URL = "https://query1.finance.yahoo.com/v8/finance/chart/EURHUF=X?in
 
 function normalizeYahooRate(payload) {
   const meta = payload?.chart?.result?.[0]?.meta;
-  const rate = Number(meta?.regularMarketPrice);
+  const bid = Number(meta?.bid);
+  const ask = Number(meta?.ask);
+  const marketPrice = Number(meta?.regularMarketPrice);
+  const hasMid = Number.isFinite(bid) && bid > 0 && Number.isFinite(ask) && ask > 0;
+  const rate = hasMid ? (bid + ask) / 2 : marketPrice;
   if (!Number.isFinite(rate) || rate <= 0) throw new Error("Érvénytelen EUR/HUF piaci árfolyam érkezett.");
 
   const marketTime = Number(meta?.regularMarketTime);
@@ -17,6 +21,7 @@ function normalizeYahooRate(payload) {
     rate,
     retrievedAt,
     source: "Yahoo Finance",
+    rateKind: hasMid ? "bid/ask közép" : "legfrissebb piaci jegyzés",
     isCached: false,
   };
 }
