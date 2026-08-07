@@ -1,0 +1,81 @@
+import { readStockWorkbook } from "./services/excelReader.js";
+import { loadExchangeRate } from "./services/exchangeRateService.js";
+import { evaluatePrices } from "./services/priceEvaluator.js";
+import { downloadCsv, downloadXlsx } from "./services/exportService.js";
+import { populateCategories, renderRate, renderSummary, renderTable, setProcessStatus, showResults } from "./ui/render.js";
+
+const state = {
+  rate: null,
+  rows: [],
+  fileName: "",
+};
+
+const elements = {
+  fileInput: document.querySelector("#fileInput"),
+  fileDrop: document.querySelector("#fileDrop"),
+  searchInput: document.querySelector("#searchInput"),
+  statusFilter: document.querySelector("#statusFilter"),
+  categoryFilter: document.querySelector("#categoryFilter"),
+  exportXlsx: document.querySelector("#exportXlsx"),
+  exportCsv: document.querySelector("#exportCsv"),
+};
+
+function currentFilteredRows() {
+  const query = elements.searchInput.value.trim().toLocaleLowerCase("hu-HU");
+  const status = elements.statusFilter.value;
+  const category = elements.categoryFilter.value;
+  return state.rows.filter((row) => {
+    const searchable = `${row.productCode} ${row.description} ${row.displayModel} ${row.sourceModel}`.toLocaleLowerCase("hu-HU");
+    return (!query || searchable.includes(query))
+      && (status === "all" || row.priceStatus === status)
+      && (category === "all" || row.category === category);
+  });
+}
+
+function applyFilters() {
+  renderTable(currentFilteredRows());
+}
+
+async function processFile(file) {
+  if (!file) return;
+  setProcessStatus(`${file.name} feldolgozása…`);
+  try {
+    const parsed = await readStockWorkbook(file);
+    state.rows = evaluatePrices(parsed.rows, state.rate.rate);
+    state.fileName = file.name;
+    renderSummary(state.rows);
+    populateCategories(state.rows);
+    renderTable(state.rows);
+    showResults(file.name, state.rows.length, parsed.sheetName);
+    setProcessStatus(`${file.name} sikeresen feldolgozva.`, "success");
+    document.querySelector("#resultsSection").scrollIntoView({ behavior: "smooth", block: "start" });
+  } catch (error) {
+    console.error(error);
+    setProcessStatus(error instanceof Error ? error.message : "A fájl feldolgozása sikertelen.", "error");
+  }
+}
+
+elements.fileInput.addEventListener("change", (event) => processFile(event.target.files?.[0]));
+for (const eventName of ["dragenter", "dragover"]) {
+  elements.fileDrop.addEventListener(eventName, (event) => {
+    event.preventDefault();
+    elements.fileDrop.classList.add("is-dragging");
+  });
+}
+for (const eventName of ["dragleave", "drop"]) {
+  elements.fileDrop.addEventListener(eventName, (event) => {
+    event.preventDefault();
+    elements.fileDrop.classList.remove("is-dragging");
+  });
+}
+elements.fileDrop.addEventListener("drop", (event) => processFile(event.dataTransfer?.files?.[0]));
+
+elements.searchInput.addEventListener("input", applyFilters);
+elements.statusFilter.addEventListener("change", applyFilters);
+elements.categoryFilter.addEventListener("change", applyFilters);
+elements.exportXlsx.addEventListener("click", () => downloadXlsx(state.rows, state.rate, state.fileName));
+elements.exportCsv.addEventListener("click", () => downloadCsv(state.rows, state.rate, state.fileName));
+
+state.rate = await loadExchangeRate();
+renderRate(state.rate);
+

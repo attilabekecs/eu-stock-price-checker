@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="hu">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="EU stock árlisták helyi feldolgozása, készülékfelismeréssel és MNB EUR/HUF középárfolyammal.">
+    <meta name="theme-color" content="#102a43">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.sheetjs.com; style-src 'self'; img-src 'self' data:; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+    <title>EU Stock ár-ellenőrző</title>
+    <link rel="stylesheet" href="./assets/styles.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="./" aria-label="EU Stock ár-ellenőrző kezdőlap">
+        <span class="brand-mark" aria-hidden="true">€</span>
+        <span>EU Stock ár-ellenőrző</span>
+      </a>
+      <span class="privacy-pill">A fájl a böngészőben marad</span>
+    </header>
+
+    <main>
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <p class="eyebrow">Készletlista → átlátható HUF-árak</p>
+          <h1 id="hero-title">Lásd azonnal, melyik készülék ára tér el a listától.</h1>
+          <p class="hero-lead">Tölts fel egy, az EU Stock listával azonos szerkezetű Excel-fájlt. Az oldal felismeri a készüléket, kiolvassa a gyorsítótárazott EUR-árat, MNB középárfolyamon forintra váltja, majd az összehasonlítható tételek mediánjához viszonyítja.</p>
+        </div>
+
+        <div class="rate-card" aria-live="polite">
+          <span class="rate-label">Aktuális MNB középárfolyam</span>
+          <strong id="rateValue">Betöltés…</strong>
+          <span id="rateDate" class="rate-date"></span>
+        </div>
+      </section>
+
+      <section class="upload-panel" aria-labelledby="upload-title">
+        <div>
+          <p class="step-label">1. lépés</p>
+          <h2 id="upload-title">Excel-lista feltöltése</h2>
+          <p>Elfogadott formátum: .xlsx vagy .xls. Az első munkalap fejlécében a <code>Model</code> és <code>UnitPrice</code> oszlopokat keressük.</p>
+        </div>
+        <label class="file-drop" for="fileInput" id="fileDrop">
+          <input id="fileInput" type="file" accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel">
+          <span class="upload-icon" aria-hidden="true">↑</span>
+          <span class="upload-title">Válassz Excel-fájlt</span>
+          <span class="upload-subtitle">vagy húzd ide</span>
+        </label>
+        <div id="processStatus" class="process-status" role="status" aria-live="polite"></div>
+      </section>
+
+      <section id="resultsSection" class="results-section is-hidden" aria-labelledby="results-title">
+        <div class="section-heading">
+          <div>
+            <p class="step-label">2. lépés</p>
+            <h2 id="results-title">Eredmények</h2>
+            <p id="fileMeta" class="section-description"></p>
+          </div>
+          <div class="export-actions">
+            <button id="exportXlsx" class="button button-primary" type="button">Excel letöltése</button>
+            <button id="exportCsv" class="button button-secondary" type="button">CSV letöltése</button>
+          </div>
+        </div>
+
+        <div class="notice" role="note">
+          <strong>Mit jelent az árpozíció?</strong>
+          <span>Azonos modell, tárhely, állapot és ÁFA-típus érvényes EUR-árainak mediánjához viszonyítunk. Ez listán belüli összehasonlítás, nem magyar piaci értékbecslés.</span>
+        </div>
+
+        <div id="summaryGrid" class="summary-grid" aria-label="Összesítés"></div>
+
+        <div class="toolbar" aria-label="Találatok szűrése">
+          <label class="search-field">
+            <span>Keresés</span>
+            <input id="searchInput" type="search" placeholder="Modell, termékkód vagy leírás">
+          </label>
+          <label>
+            <span>Árpozíció</span>
+            <select id="statusFilter">
+              <option value="all">Összes</option>
+              <option value="favorable">Kedvező</option>
+              <option value="typical">Átlagos</option>
+              <option value="high">Magas</option>
+              <option value="no-reference">Nincs összehasonlítás</option>
+              <option value="invalid">Ellenőrzendő</option>
+            </select>
+          </label>
+          <label>
+            <span>Kategória</span>
+            <select id="categoryFilter">
+              <option value="all">Összes</option>
+            </select>
+          </label>
+          <p id="visibleCount" class="visible-count"></p>
+        </div>
+
+        <div class="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Termékkód</th>
+                <th>Felismerve</th>
+                <th>Tárhely</th>
+                <th>Állapot</th>
+                <th>Készlet</th>
+                <th>EUR-ár</th>
+                <th>Ár HUF-ban</th>
+                <th>Referencia HUF</th>
+                <th>Árpozíció</th>
+              </tr>
+            </thead>
+            <tbody id="resultsBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>Az árfolyam forrása: <a href="https://www.mnb.hu/arfolyamok" target="_blank" rel="noreferrer">Magyar Nemzeti Bank</a>. A feldolgozás helyben, a böngészőben történik.</p>
+    </footer>
+
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js" defer></script>
+    <script type="module" src="./src/app.js"></script>
+  </body>
+</html>
+
