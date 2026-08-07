@@ -1,8 +1,8 @@
 import { readStockWorkbook } from "./services/excelReader.js";
 import { loadExchangeRate } from "./services/exchangeRateService.js";
-import { evaluatePrices } from "./services/priceEvaluator.js";
+import { evaluatePrices, hasUsablePrice } from "./services/priceEvaluator.js";
 import { downloadCsv, downloadXlsx } from "./services/exportService.js";
-import { populateCategories, renderRate, renderSummary, renderTable, setProcessStatus, showResults } from "./ui/render.js";
+import { populateCategories, renderRate, renderTable, setProcessStatus, showResults } from "./ui/render.js";
 
 const state = {
   rate: null,
@@ -41,14 +41,16 @@ async function processFile(file) {
   setProcessStatus(`${file.name} feldolgozása…`);
   try {
     const parsed = await readStockWorkbook(file);
-    state.rows = evaluatePrices(parsed.rows, state.rate.rate);
+    const pricedRows = parsed.rows.filter(hasUsablePrice);
+    const hiddenRowCount = parsed.rows.length - pricedRows.length;
+    state.rows = evaluatePrices(pricedRows, state.rate.rate);
     state.fileName = file.name;
-    renderSummary(state.rows);
     populateCategories(state.rows);
     renderTable(state.rows);
-    showResults(file.name, state.rows.length, parsed.sheetName);
-    setProcessStatus(`${file.name} sikeresen feldolgozva.`, "success");
-    document.querySelector("#resultsSection").scrollIntoView({ behavior: "smooth", block: "start" });
+    showResults(file.name, state.rows.length, parsed.sheetName, hiddenRowCount);
+    elements.exportXlsx.disabled = false;
+    elements.exportCsv.disabled = false;
+    setProcessStatus("Feldolgozva", "success");
   } catch (error) {
     console.error(error);
     setProcessStatus(error instanceof Error ? error.message : "A fájl feldolgozása sikertelen.", "error");
@@ -78,4 +80,3 @@ elements.exportCsv.addEventListener("click", () => downloadCsv(state.rows, state
 
 state.rate = await loadExchangeRate();
 renderRate(state.rate);
-

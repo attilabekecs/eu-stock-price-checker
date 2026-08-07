@@ -3,7 +3,6 @@ const STATUS_LABELS = Object.freeze({
   typical: "Átlagos",
   high: "Magas",
   "no-reference": "Nincs összehasonlítás",
-  invalid: "Ellenőrzendő",
 });
 
 const numberFormatter = new Intl.NumberFormat("hu-HU", { maximumFractionDigits: 2 });
@@ -51,35 +50,8 @@ export function setProcessStatus(message, kind = "") {
   status.className = `process-status${kind ? ` is-${kind}` : ""}`;
 }
 
-export function showResults(fileName, rowCount, sheetName) {
-  document.querySelector("#resultsSection").classList.remove("is-hidden");
-  document.querySelector("#fileMeta").textContent = `${fileName} · ${sheetName} · ${integerFormatter.format(rowCount)} feldolgozott tétel`;
-}
-
-export function renderSummary(rows) {
-  const counts = rows.reduce((result, row) => {
-    result[row.priceStatus] = (result[row.priceStatus] ?? 0) + 1;
-    return result;
-  }, {});
-  const cards = [
-    ["Összes tétel", rows.length],
-    ["Kedvező", counts.favorable ?? 0],
-    ["Átlagos", counts.typical ?? 0],
-    ["Magas", counts.high ?? 0],
-    ["Nincs összehasonlítás", counts["no-reference"] ?? 0],
-    ["Ellenőrzendő", counts.invalid ?? 0],
-  ];
-  const grid = document.querySelector("#summaryGrid");
-  grid.replaceChildren(...cards.map(([label, value]) => {
-    const card = document.createElement("div");
-    card.className = "summary-card";
-    const labelNode = document.createElement("span");
-    labelNode.textContent = label;
-    const valueNode = document.createElement("strong");
-    valueNode.textContent = integerFormatter.format(value);
-    card.append(labelNode, valueNode);
-    return card;
-  }));
+export function showResults(fileName, rowCount, sheetName, hiddenRowCount) {
+  document.querySelector("#fileMeta").textContent = `${fileName} · ${sheetName} · ${integerFormatter.format(rowCount)} árazott tétel · ${integerFormatter.format(hiddenRowCount)} ár nélküli sor elrejtve`;
 }
 
 export function populateCategories(rows) {

@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { evaluatePrices, priceEvaluatorInternals } from "../public/src/services/priceEvaluator.js";
+import { evaluatePrices, hasUsablePrice, priceEvaluatorInternals } from "../public/src/services/priceEvaluator.js";
 
 test("helyesen számít mediánt páros és páratlan elemszámnál", () => {
   assert.equal(priceEvaluatorInternals.median([3, 1, 2]), 2);
@@ -30,3 +30,9 @@ test("egyedi és hibás áraknál nem állít piaci minősítést", () => {
   assert.equal(result[1].priceStatus, "invalid");
 });
 
+test("csak a pozitív számszerű árat tekinti megjeleníthetőnek", () => {
+  assert.equal(hasUsablePrice({ unitPriceEur: 97 }), true);
+  assert.equal(hasUsablePrice({ unitPriceEur: 0 }), false);
+  assert.equal(hasUsablePrice({ unitPriceEur: null }), false);
+  assert.equal(hasUsablePrice({ unitPriceEur: Number.NaN }), false);
+});

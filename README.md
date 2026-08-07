@@ -9,7 +9,8 @@ Nyilvános, statikus GitHub Pages alkalmazás az EU Stock listával azonos szerk
 - Az EUR-árat a Magyar Nemzeti Bank napi középárfolyamával HUF-ra váltja.
 - Külön `Ár HUF-ban` és `Referencia HUF` oszlopot jelenít meg.
 - Az azonos modell + tárhely + állapot + ÁFA-típus csoport mediánjához képest kedvező, átlagos vagy magas listán belüli árat jelez.
-- A hibás, nulla vagy hiányzó árakat ellenőrzendőként jelöli.
+- Csak a pozitív, számszerű árral rendelkező tételeket jeleníti meg és exportálja; a hibás, nulla vagy hiányzó árú sorokat elrejti.
+- Teljes képernyős, a monitor szélességéhez igazodó táblázatos munkaterületet biztosít.
 - Az eredményt XLSX- vagy CSV-fájlként exportálja.
 
 Az Excel-fájl teljes feldolgozása a böngészőben történik; a feltöltött állomány nem kerül szerverre.
@@ -43,4 +44,3 @@ Az árpozíció kizárólag a feltöltött listán belüli összehasonlítás. N
 ## Licenc
 
 MIT
-

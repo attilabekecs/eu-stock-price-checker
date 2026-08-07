@@ -42,5 +42,8 @@ export function evaluatePrices(rows, exchangeRate) {
   });
 }
 
-export const priceEvaluatorInternals = Object.freeze({ median, priceStatus });
+export function hasUsablePrice(row) {
+  return Number.isFinite(row?.unitPriceEur) && row.unitPriceEur > 0;
+}
 
+export const priceEvaluatorInternals = Object.freeze({ median, priceStatus });
