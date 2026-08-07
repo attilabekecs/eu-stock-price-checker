@@ -61,8 +61,12 @@ function updatePurchasePrice(rowId, rawValue) {
 
 async function processFile(file) {
   if (!file) return;
-  setProcessStatus(`${file.name} feldolgozása…`);
+  setProcessStatus("Aktuális EUR/HUF piaci árfolyam lekérése…");
   try {
+    state.rate = await loadExchangeRate();
+    renderRate(state.rate);
+    setProcessStatus(`${file.name} feldolgozása…`);
+
     const parsed = await readStockWorkbook(file);
     const pricedRows = parsed.rows.filter(hasUsablePrice);
     const hiddenRowCount = parsed.rows.length - pricedRows.length;
@@ -75,7 +79,7 @@ async function processFile(file) {
     showResults(file.name, state.rows.length, parsed.sheetName, hiddenRowCount);
     elements.exportXlsx.disabled = false;
     elements.exportCsv.disabled = false;
-    setProcessStatus("Feldolgozva", "success");
+    setProcessStatus(state.rate.isCached ? "Feldolgozva · utolsó elérhető piaci árfolyammal" : "Feldolgozva · friss piaci árfolyammal", "success");
   } catch (error) {
     console.error(error);
     setProcessStatus(error instanceof Error ? error.message : "A fájl feldolgozása sikertelen.", "error");
@@ -104,5 +108,4 @@ elements.categoryFilter.addEventListener("change", applyFilters);
 elements.exportXlsx.addEventListener("click", () => downloadXlsx(state.rows, state.rate, state.fileName));
 elements.exportCsv.addEventListener("click", () => downloadCsv(state.rows, state.rate, state.fileName));
 
-state.rate = await loadExchangeRate();
-renderRate(state.rate);
+renderRate(null);
