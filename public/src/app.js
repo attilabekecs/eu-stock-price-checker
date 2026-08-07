@@ -2,7 +2,8 @@ import { readStockWorkbook } from "./services/excelReader.js";
 import { loadExchangeRate } from "./services/exchangeRateService.js";
 import { applyPurchasePrice, evaluatePrices, hasUsablePrice } from "./services/priceEvaluator.js";
 import { downloadCsv, downloadXlsx } from "./services/exportService.js";
-import { populateCategories, renderRate, renderTable, setProcessStatus, showResults } from "./ui/render.js";
+import { applySavedPurchasePrices, savePurchasePrice } from "./services/purchasePriceStore.js";
+import { populateCategories, populateConditions, renderRate, renderTable, setProcessStatus, showResults } from "./ui/render.js";
 
 const state = {
   rate: null,
@@ -15,6 +16,7 @@ const elements = {
   fileDrop: document.querySelector("#fileDrop"),
   searchInput: document.querySelector("#searchInput"),
   statusFilter: document.querySelector("#statusFilter"),
+  conditionFilter: document.querySelector("#conditionFilter"),
   categoryFilter: document.querySelector("#categoryFilter"),
   exportXlsx: document.querySelector("#exportXlsx"),
   exportCsv: document.querySelector("#exportCsv"),
@@ -23,11 +25,13 @@ const elements = {
 function currentFilteredRows() {
   const query = elements.searchInput.value.trim().toLocaleLowerCase("hu-HU");
   const status = elements.statusFilter.value;
+  const condition = elements.conditionFilter.value;
   const category = elements.categoryFilter.value;
   return state.rows.filter((row) => {
     const searchable = `${row.productCode} ${row.description} ${row.displayModel} ${row.sourceModel}`.toLocaleLowerCase("hu-HU");
     return (!query || searchable.includes(query))
       && (status === "all" || row.purchaseStatus === status)
+      && (condition === "all" || row.condition === condition)
       && (category === "all" || row.category === category);
   });
 }
@@ -45,7 +49,13 @@ function parsePurchasePrice(value) {
 
 function updatePurchasePrice(rowId, rawValue) {
   const purchasePriceHuf = parsePurchasePrice(rawValue);
-  state.rows = state.rows.map((row) => row.id === rowId ? applyPurchasePrice(row, purchasePriceHuf) : row);
+  const editedRow = state.rows.find((row) => row.id === rowId);
+  if (!editedRow) return;
+
+  savePurchasePrice(editedRow.comparisonKey, purchasePriceHuf);
+  state.rows = state.rows.map((row) => row.comparisonKey === editedRow.comparisonKey
+    ? applyPurchasePrice(row, purchasePriceHuf)
+    : row);
   applyFilters();
 }
 
@@ -56,9 +66,11 @@ async function processFile(file) {
     const parsed = await readStockWorkbook(file);
     const pricedRows = parsed.rows.filter(hasUsablePrice);
     const hiddenRowCount = parsed.rows.length - pricedRows.length;
-    state.rows = evaluatePrices(pricedRows, state.rate.rate);
+    const evaluatedRows = evaluatePrices(pricedRows, state.rate.rate);
+    state.rows = applySavedPurchasePrices(evaluatedRows, applyPurchasePrice);
     state.fileName = file.name;
     populateCategories(state.rows);
+    populateConditions(state.rows);
     renderTable(state.rows, updatePurchasePrice);
     showResults(file.name, state.rows.length, parsed.sheetName, hiddenRowCount);
     elements.exportXlsx.disabled = false;
@@ -87,6 +99,7 @@ elements.fileDrop.addEventListener("drop", (event) => processFile(event.dataTran
 
 elements.searchInput.addEventListener("input", applyFilters);
 elements.statusFilter.addEventListener("change", applyFilters);
+elements.conditionFilter.addEventListener("change", applyFilters);
 elements.categoryFilter.addEventListener("change", applyFilters);
 elements.exportXlsx.addEventListener("click", () => downloadXlsx(state.rows, state.rate, state.fileName));
 elements.exportCsv.addEventListener("click", () => downloadCsv(state.rows, state.rate, state.fileName));
