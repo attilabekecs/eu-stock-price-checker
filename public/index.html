@@ -31,7 +31,7 @@
         <div class="section-heading">
           <div>
             <h1 id="results-title">Készülékárak</h1>
-            <p id="fileMeta" class="section-description">Tölts fel egy Excel-listát, majd add meg a saját vételi áraidat HUF-ban.</p>
+            <p id="fileMeta" class="section-description">Tölts fel egy Excel-listát, majd add meg a saját vételi áraidat HUF-ban. A megadott árak ebben a böngészőben automatikusan megmaradnak.</p>
           </div>
           <div class="export-actions">
             <button id="exportXlsx" class="button button-primary" type="button" disabled>Excel letöltése</button>
@@ -43,6 +43,12 @@
           <label class="search-field">
             <span>Keresés</span>
             <input id="searchInput" type="search" placeholder="Modell, termékkód vagy leírás">
+          </label>
+          <label>
+            <span>Állapot</span>
+            <select id="conditionFilter">
+              <option value="all">Összes</option>
+            </select>
           </label>
           <label>
             <span>Értékelés</span>
