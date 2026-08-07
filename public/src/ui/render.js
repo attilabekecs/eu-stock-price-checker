@@ -8,7 +8,13 @@ const numberFormatter = new Intl.NumberFormat("hu-HU", { maximumFractionDigits: 
 const integerFormatter = new Intl.NumberFormat("hu-HU", { maximumFractionDigits: 0 });
 const eurFormatter = new Intl.NumberFormat("hu-HU", { style: "currency", currency: "EUR", maximumFractionDigits: 2 });
 const hufFormatter = new Intl.NumberFormat("hu-HU", { style: "currency", currency: "HUF", maximumFractionDigits: 0 });
-const dateFormatter = new Intl.DateTimeFormat("hu-HU", { year: "numeric", month: "long", day: "numeric" });
+const dateTimeFormatter = new Intl.DateTimeFormat("hu-HU", {
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+});
 
 function appendCell(row, content, className = "") {
   const cell = document.createElement("td");
@@ -58,9 +64,18 @@ function vatLabel(item) {
 }
 
 export function renderRate(rate) {
-  document.querySelector("#rateValue").textContent = `1 EUR = ${numberFormatter.format(rate.rate)} HUF`;
-  const formattedDate = dateFormatter.format(new Date(`${rate.date}T12:00:00`));
-  document.querySelector("#rateDate").textContent = `${formattedDate}${rate.isFallback ? " · tartalék adat" : " · MNB"}`;
+  const value = document.querySelector("#rateValue");
+  const date = document.querySelector("#rateDate");
+
+  if (!rate) {
+    value.textContent = "Árfolyam: lista feltöltésekor frissül";
+    date.textContent = "";
+    return;
+  }
+
+  value.textContent = `1 EUR = ${numberFormatter.format(rate.rate)} HUF`;
+  const formattedTime = dateTimeFormatter.format(new Date(rate.retrievedAt));
+  date.textContent = `${formattedTime} · ${rate.source}${rate.isCached ? " · utolsó elérhető adat" : ""}`;
 }
 
 export function setProcessStatus(message, kind = "") {
