@@ -75,6 +75,8 @@ button, input, select { font: inherit; }
 .header-rate span { color: var(--ink-soft); font-size: 0.72rem; }
 
 .file-drop {
+  position: relative;
+  overflow: hidden;
   min-height: 42px;
   padding: 0 15px;
   display: inline-flex;
@@ -92,7 +94,14 @@ button, input, select { font: inherit; }
 }
 
 .file-drop:hover, .file-drop.is-dragging { background: var(--primary-dark); transform: translateY(-1px); }
-.file-drop input { position: absolute; inline-size: 1px; block-size: 1px; opacity: 0; }
+.file-drop input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
 
 main {
   width: 100%;
@@ -149,7 +158,7 @@ p { margin-top: 0; }
 .toolbar {
   margin: 13px 0 7px;
   display: grid;
-  grid-template-columns: minmax(280px, 1fr) minmax(165px, 210px) minmax(165px, 210px) minmax(160px, auto);
+  grid-template-columns: minmax(260px, 1fr) minmax(130px, 170px) minmax(150px, 190px) minmax(150px, 190px) minmax(140px, auto);
   gap: 9px;
   align-items: end;
 }
@@ -178,7 +187,7 @@ p { margin-top: 0; }
   border-color: var(--primary);
 }
 
-.result-state { min-width: 160px; padding-bottom: 2px; text-align: right; }
+.result-state { min-width: 140px; padding-bottom: 2px; text-align: right; }
 .visible-count { margin-bottom: 2px; color: var(--ink); font-size: 0.82rem; font-weight: 800; }
 .process-status { min-height: 1rem; margin: 0; color: var(--ink-soft); font-size: 0.7rem; }
 .process-status.is-error { color: #b42318; }
@@ -275,14 +284,17 @@ tbody tr:last-child td { border-bottom: 0; }
   table { font-size: 0.9rem; }
 }
 
+@media (max-width: 1050px) {
+  .toolbar { grid-template-columns: 1fr 1fr; }
+  .search-field { grid-column: 1 / -1; }
+}
+
 @media (max-width: 850px) {
   body { height: auto; min-height: 100%; overflow: auto; }
   .site-header { flex-wrap: wrap; }
   .header-rate { order: 3; width: 100%; align-items: start; justify-items: start; }
   main { min-height: calc(100vh - 112px); }
   .section-heading { align-items: flex-start; flex-direction: column; }
-  .toolbar { grid-template-columns: 1fr 1fr; }
-  .search-field { grid-column: 1 / -1; }
   .result-state { align-self: center; text-align: left; }
   .table-shell { min-height: 520px; }
 }
