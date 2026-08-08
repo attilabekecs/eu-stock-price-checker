@@ -8,7 +8,9 @@
     "test": "node --test",
     "update-rate": "node scripts/update-mnb-rate.mjs",
     "package:release": "bash scripts/package-release.sh",
-    "deploy:nas": "bash scripts/deploy.sh"
+    "deploy:nas": "bash scripts/deploy.sh",
+    "build:wd": "bash scripts/build-wd-bin.sh",
+    "install:wd": "bash scripts/install-wd-bin.sh"
   },
   "engines": {
     "node": ">=20"
