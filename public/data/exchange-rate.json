@@ -1,9 +1,0 @@
-{
-  "base": "EUR",
-  "quote": "HUF",
-  "rate": 366.4,
-  "date": "2026-08-07",
-  "source": "MNB",
-  "sourceUrl": "https://www.mnb.hu/arfolyamok",
-  "retrievedAt": "2026-08-07T15:08:43.234Z"
-}
