@@ -1,0 +1,47 @@
+name: Release a NAS-ra
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  build-release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20.18.0"
+      - name: Verzió ellenőrzése
+        id: app
+        shell: bash
+        run: |
+          set -euo pipefail
+          source app.config
+          version="$(node -p "JSON.parse(require('fs').readFileSync('./version.json','utf8')).version")"
+          package_version="$(node -p "require('./package.json').version")"
+          [[ "$version" == "$package_version" ]]
+          tag="v$version"
+          if [[ "${GITHUB_REF_TYPE:-}" == "tag" && "$GITHUB_REF_NAME" != "$tag" ]]; then exit 1; fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "asset=dist/$GITHUB_ASSET_PREFIX-$tag.tar.gz" >> "$GITHUB_OUTPUT"
+      - run: npm test
+      - name: NAS release csomag
+        run: bash scripts/package-release.sh "${{ steps.app.outputs.asset }}"
+      - name: GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "${{ steps.app.outputs.tag }}" >/dev/null 2>&1; then
+            gh release upload "${{ steps.app.outputs.tag }}" "${{ steps.app.outputs.asset }}" --clobber
+          else
+            gh release create "${{ steps.app.outputs.tag }}" "${{ steps.app.outputs.asset }}" --title "EU Stock ár-ellenőrző ${{ steps.app.outputs.version }}" --generate-notes
+          fi
