@@ -3,10 +3,15 @@ name: Release a NAS-ra
 on:
   workflow_dispatch:
   push:
+    branches: ["main"]
     tags: ["v*"]
 
 permissions:
   contents: write
+
+concurrency:
+  group: nas-release-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   build-release:
@@ -43,5 +48,5 @@ jobs:
           if gh release view "${{ steps.app.outputs.tag }}" >/dev/null 2>&1; then
             gh release upload "${{ steps.app.outputs.tag }}" "${{ steps.app.outputs.asset }}" --clobber
           else
-            gh release create "${{ steps.app.outputs.tag }}" "${{ steps.app.outputs.asset }}" --title "EU Stock ár-ellenőrző ${{ steps.app.outputs.version }}" --generate-notes
+            gh release create "${{ steps.app.outputs.tag }}" "${{ steps.app.outputs.asset }}" --title "EU Stock ár-ellenőrző ${{ steps.app.outputs.version }}" --target "$GITHUB_SHA" --generate-notes
           fi
